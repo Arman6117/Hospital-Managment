@@ -16,9 +16,9 @@ const Logo = () => (
 
 const NavLinks = ({ isMobile = false, onLinkClick, activeLink }: { isMobile?: boolean; onLinkClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void; activeLink: string }) => {
   const links = [
-    { name: 'Dashboard', icon: Home, href: '#dashboard' },
-    { name: 'Patients', icon: Users, href: '#patients' },
-    { name: 'Appointments', icon: Calendar, href: '#appointments' },
+    { name: 'Dashboard', icon: Home, href: '/dashboard' },
+    { name: 'Patients', icon: Users, href: '/patients' },
+    { name: 'Appointments', icon: Calendar, href: '/appointments' },
   ];
 
   return (
@@ -113,7 +113,7 @@ const MobileMenu = ({ isOpen, onClose, activeLink, onLinkClick }:{isOpen:boolean
 
 export default function HospitalNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeLink, setActiveLink] = useState('#dashboard');
+  const [activeLink, setActiveLink] = useState('/dashboard');
 
   const handleLinkClick = (href:string) => {
     setActiveLink(href);
