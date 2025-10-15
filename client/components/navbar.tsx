@@ -18,7 +18,7 @@ const Logo = () => (
 const NavLinks = ({ isMobile = false, onLinkClick, activeLink }: { isMobile?: boolean; onLinkClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void; activeLink: string }) => {
   const links = [
     { name: 'Dashboard', icon: Home, href: '/dashboard' },
-    { name: 'Patients', icon: Users, href: '/patients' },
+    { name: 'Patients', icon: Users, href: '/patient' },
     { name: 'Appointments', icon: Calendar, href: '/appointments' },
   ];
 
