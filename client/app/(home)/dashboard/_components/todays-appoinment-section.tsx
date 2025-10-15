@@ -20,29 +20,6 @@ const initialAppointments: Appointment[] = [
   { id: 4, patient: "Vikram Desai", time: "02:30 PM", status: "Pending" },
 ];
 
-const StatusBadge = ({ status }: { status: Appointment["status"] }) => {
-  const variants = {
-    Pending: "bg-amber-100 text-amber-700 border-amber-200",
-    Missed: "bg-red-100 text-red-700 border-red-200",
-    Completed: "bg-green-100 text-green-700 border-green-200",
-  };
-
-  const icons = {
-    Pending: Clock,
-    Missed: AlertCircle,
-    Completed: Check,
-  };
-
-  const Icon = icons[status];
-
-  return (
-    <Badge className={`${variants[status]} flex items-center gap-1.5 px-3 py-1 font-medium border`}>
-      <Icon className="w-3.5 h-3.5" />
-      {status}
-    </Badge>
-  );
-};
-
 const TodaysAppointmentSection = () => {
   const [appointments, setAppointments] = useState(initialAppointments);
 
@@ -165,9 +142,7 @@ const TodaysAppointmentSection = () => {
                   </div>
                 </div>
 
-                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <StatusBadge status={appt.status} />
-                </div>
+              
               </div>
             ))}
           </div>

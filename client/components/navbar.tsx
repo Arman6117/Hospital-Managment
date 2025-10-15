@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Heart, LogOut, Home, Users, Calendar, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 const Logo = () => (
   <div className="flex items-center gap-3">
@@ -114,9 +115,10 @@ const MobileMenu = ({ isOpen, onClose, activeLink, onLinkClick }:{isOpen:boolean
 export default function HospitalNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeLink, setActiveLink] = useState('/dashboard');
-
+ const router  = useRouter();
   const handleLinkClick = (href:string) => {
     setActiveLink(href);
+    router.push(href);
     setMobileMenuOpen(false);
   };
 
