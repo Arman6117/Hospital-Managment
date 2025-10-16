@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { Heart, LogOut, Home, Users, Calendar, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+
 
 const Logo = () => (
   <div className="flex items-center gap-3">
@@ -15,18 +16,23 @@ const Logo = () => (
   </div>
 );
 
-const NavLinks = ({ isMobile = false, onLinkClick, activeLink }: { isMobile?: boolean; onLinkClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void; activeLink: string }) => {
+const NavLinks = ({ isMobile = false, onLinkClick, currentPath }: { isMobile?: boolean; onLinkClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void; currentPath: string }) => {
   const links = [
     { name: 'Dashboard', icon: Home, href: '/dashboard' },
     { name: 'Patients', icon: Users, href: '/patient' },
     { name: 'Appointments', icon: Calendar, href: '/appointments' },
   ];
 
+  const pathWithoutQuery = currentPath.split('?')[0];
+  const segments = pathWithoutQuery.split('/').filter(segment => segment.length > 0);
+  const primaryRoute = segments[0] ? `/${segments[0]}` : '/dashboard';
+
   return (
     <>
       {links.map((link) => {
         const Icon = link.icon;
-        const isActive = activeLink === link.href;
+        
+        const isActive = link.href === primaryRoute;
         
         const linkClass = isMobile
           ? `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
@@ -56,7 +62,7 @@ const NavLinks = ({ isMobile = false, onLinkClick, activeLink }: { isMobile?: bo
   );
 };
 
-const LogoutButton = ({ isMobile = false }) => {
+const LogoutButton = ({ isMobile = false }: { isMobile?: boolean }) => {
   const handleLogout = () => {
     console.log('Logging out...');
   };
@@ -77,7 +83,7 @@ const LogoutButton = ({ isMobile = false }) => {
   );
 };
 
-const MobileMenu = ({ isOpen, onClose, activeLink, onLinkClick }:{isOpen:boolean, onClose:()=>void, activeLink:string, onLinkClick:(e:React.MouseEvent<HTMLAnchorElement>)=>void}) => {
+const MobileMenu = ({ isOpen, onClose, currentPath, onLinkClick }:{isOpen:boolean, onClose:()=>void, currentPath:string, onLinkClick:(e:React.MouseEvent<HTMLAnchorElement>)=>void}) => {
   if (!isOpen) return null;
 
   return (
@@ -100,7 +106,7 @@ const MobileMenu = ({ isOpen, onClose, activeLink, onLinkClick }:{isOpen:boolean
           </div>
 
           <nav className="flex-1 p-4 space-y-2">
-            <NavLinks isMobile={true} onLinkClick={onLinkClick} activeLink={activeLink} />
+            <NavLinks isMobile={true} onLinkClick={onLinkClick} currentPath={currentPath} />
           </nav>
 
           <div className="p-4 border-t">
@@ -114,10 +120,11 @@ const MobileMenu = ({ isOpen, onClose, activeLink, onLinkClick }:{isOpen:boolean
 
 export default function HospitalNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeLink, setActiveLink] = useState('/dashboard');
- const router  = useRouter();
+  
+  const router = useRouter();
+  const pathname = usePathname();
+
   const handleLinkClick = (href:string) => {
-    setActiveLink(href);
     router.push(href);
     setMobileMenuOpen(false);
   };
@@ -129,10 +136,13 @@ export default function HospitalNavbar() {
           <Logo />
 
           <div className="hidden lg:flex items-center gap-2">
-            <NavLinks activeLink={activeLink} onLinkClick={(e) => {
-              e.preventDefault();
-              handleLinkClick(e.currentTarget.getAttribute('href')!);
-            }} />
+            <NavLinks 
+              currentPath={pathname} 
+              onLinkClick={(e) => {
+                e.preventDefault();
+                handleLinkClick(e.currentTarget.getAttribute('href')!);
+              }} 
+            />
           </div>
 
           <div className="hidden lg:block">
@@ -151,7 +161,7 @@ export default function HospitalNavbar() {
       <MobileMenu 
         isOpen={mobileMenuOpen} 
         onClose={() => setMobileMenuOpen(false)}
-        activeLink={activeLink}
+        currentPath={pathname}
         onLinkClick={(e) => {
           e.preventDefault();
           handleLinkClick(e.currentTarget.getAttribute('href')!);

@@ -24,6 +24,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import Link from 'next/link';
 
 type Patient = {
   id: number;
@@ -264,13 +265,15 @@ const PatientTable = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <Link href={`/patient/${patient.id}`}>
                       <Button
                         size="sm"
                         variant="ghost"
                         className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
-                      >
+                        >
                         <Eye className="w-4 h-4" />
                       </Button>
+                      </Link>
                       <Button
                         size="sm"
                         variant="ghost"
