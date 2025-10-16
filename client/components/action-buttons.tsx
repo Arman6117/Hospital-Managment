@@ -143,7 +143,7 @@ const ActionButtons = () => {
           )}
         </div>
 
-        <Link href="/add-patient">
+        <Link href="/patient/add-patient">
           <Button
             className="bg-white text-black cursor-pointer hover:bg-gray-400 border-gray-500 shadow-lg hover:shadow-xl transition-all gap-2"
             size="lg"
@@ -153,7 +153,7 @@ const ActionButtons = () => {
           </Button>
         </Link>
 
-        <Link href="/add-appointment">
+        <Link href="/appointments/add-appointment">
           <Button
             className="bg-orange-600 hover:bg-orange-700 shadow-lg hover:shadow-xl transition-all gap-2"
             size="lg"
