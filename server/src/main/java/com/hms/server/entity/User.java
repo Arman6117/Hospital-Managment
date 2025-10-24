@@ -8,10 +8,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 @Table(name = "hmsUser")
 public class User {
     @Id
@@ -20,6 +16,7 @@ public class User {
     private String name;
     private String email;
     private String password;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
