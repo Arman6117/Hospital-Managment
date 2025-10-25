@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -15,12 +15,14 @@ import { EditPatientDialog } from "./edit-patient-dialog";
 import { AddMedicalRecordDialog } from "./add-medical-record-dialog";
 import PatientBasicInfoCard from "./patient-basic-info-card";
 import PatientMedicalRecordCard from "./patient-medical-record-card";
+import { patientAPI } from "@/lib/apis/patients/api";
+import { toast } from "sonner";
 
 export type MedicalRecord = {
   id: number;
   date: string;
   diagnosis: string;
-  medicineType:string;
+  medicineType: string;
   medicineName: string;
   note?: string;
 };
@@ -30,44 +32,9 @@ export type Patient = {
   name: string;
   age: number;
   gender: "Male" | "Female" | "Other";
-  mobile: string;
+  mob: string;
 
   medicalRecords: MedicalRecord[];
-};
-
-const mockPatient: Patient = {
-  id: 1,
-  name: "Aditi Singh",
-  age: 28,
-  gender: "Female",
-  mobile: "+91 98765 43210",
-
-  medicalRecords: [
-    {
-      id: 1,
-      date: "2025-10-15",
-      diagnosis: "Common Cold",
-      medicineType: "Tablet",
-      medicineName: "Paracetamol 500mg",
-      note: "Take twice daily after meals for 3 days",
-    },
-    {
-      id: 2,
-      date: "2025-09-20",
-      diagnosis: "Seasonal Allergy",
-      medicineType: "Syrup",
-      medicineName: "Cetirizine 10ml",
-      note: "Take 5ml before bedtime",
-    },
-    {
-      id: 3,
-      date: "2025-08-10",
-      diagnosis: "Vitamin D Deficiency",
-      medicineType: "Capsule",
-      medicineName: "Vitamin D3 60000 IU",
-      note: "Take once weekly for 8 weeks",
-    },
-  ],
 };
 
 const GenderBadge = ({ gender }: { gender: string }) => {
@@ -87,9 +54,47 @@ const GenderBadge = ({ gender }: { gender: string }) => {
   );
 };
 
-const PatientDetails = () => {
-  const [patient, setPatient] = useState(mockPatient);
+const PatientDetails = ({ id }: { id: string }) => {
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  const fetchPatient = async () => {
+    setLoading(true);
+    try {
+      const response = await patientAPI.getById(Number.parseInt(id));
+      setPatient(response);
+      
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to fetch patient");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPatient();
+  }, [id]);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/30 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="animate-pulse">Loading patient details...</div>
+        </div>
+      </div>
+    );
+  }
+  if (!patient) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/30 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div>Patient not found</div>
+        </div>
+      </div>
+    );
+  }
+  
+    console.log(patient)
   const handleSavePatient = (data: Patient) => {
     setPatient(data);
     console.log("Patient updated:", data);
@@ -151,7 +156,7 @@ const PatientDetails = () => {
                 icon={Phone}
                 iconColor="from-teal-500 to-emerald-500  "
                 label="Mobile"
-                value={patient.mobile}
+                value={patient.mob}
               />
 
               <PatientBasicInfoCard
@@ -159,7 +164,7 @@ const PatientDetails = () => {
                 icon={Calendar}
                 iconColor="from-amber-500 to-orange-500   "
                 label="Total Visits"
-                value={patient.medicalRecords.length}
+                value={1}
               />
             </div>
           </CardContent>
@@ -181,7 +186,7 @@ const PatientDetails = () => {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              {patient.medicalRecords.map((record) => (
+              {/* {patient.medicalRecords.map((record) => (
                 <PatientMedicalRecordCard
                   date={record.date}
                   diagnosis={record.diagnosis}
@@ -190,7 +195,7 @@ const PatientDetails = () => {
                   note={record.note}
                   key={record.id}
                 />
-              ))}
+              ))} */}
             </div>
           </CardContent>
         </Card>

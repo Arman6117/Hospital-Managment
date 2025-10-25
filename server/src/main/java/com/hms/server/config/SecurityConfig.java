@@ -2,6 +2,7 @@ package com.hms.server.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // Import HttpMethod
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,7 +15,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -33,57 +33,51 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                // 1. Enable CORS and use the CorsConfigurationSource Bean defined below
-                .cors(Customizer.withDefaults())
-
-                // Disable CSRF (standard for API using token auth)
-                .csrf(AbstractHttpConfigurer::disable)
-
-                .authorizeHttpRequests(auth -> auth
-                        // FIX: Explicitly permit OPTIONS requests globally for CORS pre-flight
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // Public authentication routes
-                        .requestMatchers("/api/auth/**").permitAll()
-
-                        // All other routes require authentication
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
-    /**
-     * Defines the global CORS configuration as a bean.
-     * This ensures the settings are correctly picked up by http.cors(Customizer.withDefaults()).
-     */
+    // Global CORS Configuration Bean (Crucial for allowing Authorization header)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // Ensure this matches the origin of your Next.js application
+        // Explicitly allow your Next.js origin
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-
-        // Allow all necessary HTTP methods
+        // Allow all patient CRUD methods plus OPTIONS for pre-flight
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // FIX: Explicitly allow custom headers required by the browser (especially Authorization)
+        // Explicitly allow custom headers like Authorization
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-
-        // Must be true since you are sending an Authorization header (credentials)
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Apply this configuration to all endpoints
+        // Apply this configuration to all paths
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
+    }
+
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                // 1. Enable CORS using the global configuration bean
+                .cors(Customizer.withDefaults())
+                // 2. Disable CSRF for API token usage
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // 3. Authorization Rules
+                .authorizeHttpRequests(auth -> auth
+                        // FIX: Explicitly permit OPTIONS method for ALL paths, including dynamic ones
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Allow public auth routes
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // All other routes require authentication (including /api/patients/{id})
+                        .anyRequest().authenticated()
+                )
+                // 4. Session Management: Stateless for JWT
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                // 5. Add JWT Filter before standard authentication filter
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 }

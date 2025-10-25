@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -25,32 +25,11 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import Link from 'next/link';
+import { patientAPI } from '@/lib/apis/patients/api';
+import { Patient } from '@/types/patient';
 
-type Patient = {
-  id: number;
-  name: string;
-  age: number;
-  gender: 'Male' | 'Female' | 'Other';
-  lastVisited: string;
-};
 
-const mockPatients: Patient[] = [
-  { id: 1, name: 'Aditi Singh', age: 28, gender: 'Female', lastVisited: '2025-10-15' },
-  { id: 2, name: 'Rahul Sharma', age: 45, gender: 'Male', lastVisited: '2025-10-14' },
-  { id: 3, name: 'Sneha Patil', age: 32, gender: 'Female', lastVisited: '2025-10-13' },
-  { id: 4, name: 'Vikram Desai', age: 55, gender: 'Male', lastVisited: '2025-10-12' },
-  { id: 5, name: 'Priya Reddy', age: 38, gender: 'Female', lastVisited: '2025-10-11' },
-  { id: 6, name: 'Arjun Mehta', age: 41, gender: 'Male', lastVisited: '2025-10-10' },
-  { id: 7, name: 'Kavya Iyer', age: 26, gender: 'Female', lastVisited: '2025-10-09' },
-  { id: 8, name: 'Rohan Kapoor', age: 52, gender: 'Male', lastVisited: '2025-10-08' },
-  { id: 9, name: 'Meera Joshi', age: 35, gender: 'Female', lastVisited: '2025-10-07' },
-  { id: 10, name: 'Amit Kumar', age: 48, gender: 'Male', lastVisited: '2025-10-06' },
-  { id: 11, name: 'Neha Gupta', age: 29, gender: 'Female', lastVisited: '2025-10-05' },
-  { id: 12, name: 'Sanjay Verma', age: 62, gender: 'Male', lastVisited: '2025-10-04' },
-  { id: 13, name: 'Anjali Nair', age: 31, gender: 'Female', lastVisited: '2025-10-03' },
-  { id: 14, name: 'Kiran Rao', age: 44, gender: 'Other', lastVisited: '2025-10-02' },
-  { id: 15, name: 'Pooja Shah', age: 27, gender: 'Female', lastVisited: '2025-10-01' },
-];
+
 
 const GenderBadge = ({ gender }: { gender: Patient['gender'] }) => {
   const variants = {
@@ -67,14 +46,58 @@ const GenderBadge = ({ gender }: { gender: Patient['gender'] }) => {
 };
 
 const PatientTable = () => {
+
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [ageSortOrder, setAgeSortOrder] = useState<'asc' | 'desc' | 'none'>('none');
   const itemsPerPage = 10;
 
+  
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  
+  const fetchPatients = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const data = await patientAPI.getAll();
+      setPatients(data);
+    } catch (err) {
+      console.error('Error fetching patients:', err);
+      setError('Failed to load patients. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
+  const handleDelete = async (id: number, name: string) => {
+    if (!confirm(`Are you sure you want to delete ${name}?`)) {
+      return;
+    }
+
+    try {
+      await patientAPI.delete(id);
+      
+      await fetchPatients();
+      alert('Patient deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting patient:', err);
+      alert('Failed to delete patient. Please try again.');
+    }
+  };
+
+  
   const filteredAndSortedPatients = useMemo(() => {
-    let filtered = mockPatients;
+    let filtered = patients;
 
     if (searchQuery) {
       filtered = filtered.filter(patient =>
@@ -93,7 +116,7 @@ const PatientTable = () => {
     }
 
     return filtered;
-  }, [searchQuery, genderFilter, ageSortOrder]);
+  }, [patients, searchQuery, genderFilter, ageSortOrder]);
 
   const totalPages = Math.ceil(filteredAndSortedPatients.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -164,6 +187,35 @@ const PatientTable = () => {
     setGenderFilter(value);
     setCurrentPage(1);
   };
+
+  
+  if (loading) {
+    return (
+      <CardContent className="p-12">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-600">Loading patients...</p>
+        </div>
+      </CardContent>
+    );
+  }
+
+  
+  if (error) {
+    return (
+      <CardContent className="p-12">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+            <User className="w-8 h-8 text-red-600" />
+          </div>
+          <p className="text-red-600 font-medium">{error}</p>
+          <Button onClick={fetchPatients} className="bg-blue-600 hover:bg-blue-700">
+            Try Again
+          </Button>
+        </div>
+      </CardContent>
+    );
+  }
 
   return (
     <CardContent className="p-0">
@@ -261,22 +313,26 @@ const PatientTable = () => {
                     <GenderBadge gender={patient.gender} />
                   </TableCell>
                   <TableCell className="text-gray-700">
-                    {format(new Date(patient.lastVisited), 'MMM dd, yyyy')}
+                    {patient.lastVisited 
+                      ? format(new Date(patient.lastVisited), 'MMM dd, yyyy')
+                      : 'N/A'
+                    }
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link href={`/patient/${patient.id}`}>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
                         >
-                        <Eye className="w-4 h-4" />
-                      </Button>
+                          <Eye className="w-4 h-4" />
+                        </Button>
                       </Link>
                       <Button
                         size="sm"
                         variant="ghost"
+                        onClick={() => handleDelete(patient.id, patient.name)}
                         className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
                       >
                         <Trash className="w-4 h-4" />
