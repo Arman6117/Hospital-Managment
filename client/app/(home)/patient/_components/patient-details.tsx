@@ -83,7 +83,7 @@ const PatientDetails = ({ id }: { id: string }) => {
   }
 
   const handleSavePatient = async (data: Patient) => {
-    console.log(data);
+  
     try {
       await patientAPI.update(Number.parseInt(id), data);
       setPatient(data);
@@ -96,11 +96,11 @@ const PatientDetails = ({ id }: { id: string }) => {
 
   const handleAddRecord = async (record: CreateMedicalRecord) => {
     try {
-      console.log(record);
+    
       record.patientId = Number.parseInt(id);
       const newRecord = await medicalRecordAPI.create(record);
 
-      // Add the new record to the state
+
       setMedicalRecords((prev) => [newRecord, ...prev]);
 
       toast.success("Record Added");

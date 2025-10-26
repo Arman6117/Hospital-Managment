@@ -3,15 +3,11 @@ import { Patient } from "@/types/patient";
 
 export const patientAPI = {
   getAll: async () => {
-   
-    const response = await fetch(
-      `http://localhost:8284/api/patients`,
-      {
-        method: "GET",
-        headers: getHeaders(),
-      }
-    );
-   
+    const response = await fetch(`http://localhost:8284/api/patients`, {
+      method: "GET",
+      headers: getHeaders(),
+    });
+
     if (!response.ok) throw new Error("Failed to fetch patients");
     return response.json();
   },
@@ -55,7 +51,6 @@ export const patientAPI = {
     return response.json();
   },
   update: async (id: number, data: Partial<Patient>) => {
-    console.log(data)
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/patients/${id}`,
       {
