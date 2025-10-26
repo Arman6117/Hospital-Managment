@@ -28,13 +28,13 @@ public class AppointmentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteAppointment(@PathVariable("id") Long id) {
         appointmentService.deleteAppointment(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Appointment> updateAppointment(@PathVariable Long id, @RequestBody String status) {
+    public ResponseEntity<Appointment> updateAppointment(@PathVariable("id") Long id, @RequestBody String status) {
         return ResponseEntity.ok(appointmentService.updateAppointmentStatus(id, status));
     }
 
