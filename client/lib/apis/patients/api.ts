@@ -38,7 +38,7 @@ export const patientAPI = {
     return response.json();
   },
 
-  create: async (data: Omit<Patient, "createdAt">) => {
+  create: async (data: Omit<Patient,"id">) => {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/patients`,
       {
@@ -70,7 +70,8 @@ export const patientAPI = {
         headers: getHeaders(),
       }
     );
+   
     if (!response.ok) throw new Error("Failed to delete patient");
-    return response.json();
+    return 
   },
 };
