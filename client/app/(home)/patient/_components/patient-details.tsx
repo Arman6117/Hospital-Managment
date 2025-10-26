@@ -17,25 +17,9 @@ import PatientBasicInfoCard from "./patient-basic-info-card";
 import PatientMedicalRecordCard from "./patient-medical-record-card";
 import { patientAPI } from "@/lib/apis/patients/api";
 import { toast } from "sonner";
+import { medicalRecordAPI } from "@/lib/apis/patients/medical-records/api";
+import { CreateMedicalRecord, MedicalRecord, Patient } from "@/types/patient";
 
-export type MedicalRecord = {
-  id: number;
-  date: string;
-  diagnosis: string;
-  medicineType: string;
-  medicineName: string;
-  note?: string;
-};
-
-export type Patient = {
-  id: number;
-  name: string;
-  age: number;
-  gender: "Male" | "Female" | "Other";
-  mob: string;
-
-  medicalRecords: MedicalRecord[];
-};
 
 const GenderBadge = ({ gender }: { gender: string }) => {
   const variants = {
@@ -57,13 +41,17 @@ const GenderBadge = ({ gender }: { gender: string }) => {
 const PatientDetails = ({ id }: { id: string }) => {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
+  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
 
   const fetchPatient = async () => {
     setLoading(true);
     try {
-      const response = await patientAPI.getById(Number.parseInt(id));
-      setPatient(response);
-      
+      const patientData = await patientAPI.getById(Number.parseInt(id));
+      const medicalRecords = await medicalRecordAPI.getPatientMedicalRecords(
+        Number.parseInt(id)
+      );
+      setPatient(patientData);
+      setMedicalRecords(medicalRecords)
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch patient");
@@ -75,6 +63,7 @@ const PatientDetails = ({ id }: { id: string }) => {
   useEffect(() => {
     fetchPatient();
   }, [id]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/30 p-6">
@@ -93,20 +82,26 @@ const PatientDetails = ({ id }: { id: string }) => {
       </div>
     );
   }
-  
-    console.log(patient)
+
   const handleSavePatient = (data: Patient) => {
     setPatient(data);
     console.log("Patient updated:", data);
   };
 
-  const handleAddRecord = (record: Omit<MedicalRecord, "id">) => {
-    const newRecord = { ...record, id: patient.medicalRecords.length + 1 };
-    setPatient({
-      ...patient,
-      medicalRecords: [newRecord, ...patient.medicalRecords],
-    });
-    console.log("Record added:", newRecord);
+  const handleAddRecord = async(record: CreateMedicalRecord) => {
+      try {
+        console.log(record)
+        record.patientId = Number.parseInt(id);
+        const newRecord = await medicalRecordAPI.create(record)
+        
+        // Add the new record to the state
+        setMedicalRecords(prev => [newRecord, ...prev]);
+        
+        toast.success("Record Added")
+      } catch (error) {
+        console.log(error)
+        toast.error("Failed to add record")
+      }
   };
 
   return (
@@ -164,7 +159,7 @@ const PatientDetails = ({ id }: { id: string }) => {
                 icon={Calendar}
                 iconColor="from-amber-500 to-orange-500   "
                 label="Total Visits"
-                value={1}
+                value={medicalRecords.length}
               />
             </div>
           </CardContent>
@@ -186,16 +181,12 @@ const PatientDetails = ({ id }: { id: string }) => {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              {/* {patient.medicalRecords.map((record) => (
+               {medicalRecords.map((record) => (
                 <PatientMedicalRecordCard
-                  date={record.date}
-                  diagnosis={record.diagnosis}
-                  medicineName={record.medicineName}
-                  medicineType={record.medicineType}
-                  note={record.note}
-                  key={record.id}
+                 record={record}
+                  key={record.m_id}
                 />
-              ))} */}
+              ))} 
             </div>
           </CardContent>
         </Card>
