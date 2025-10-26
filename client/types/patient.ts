@@ -3,7 +3,7 @@ export type PatientTable = {
   name: string;
   age: number;
   gender: "Male" | "Female" | "Other";
-  mobile: string;
+  mob: string;
   lastVisited: string;
   createdAt: string;
 };

@@ -20,7 +20,6 @@ import { toast } from "sonner";
 import { medicalRecordAPI } from "@/lib/apis/patients/medical-records/api";
 import { CreateMedicalRecord, MedicalRecord, Patient } from "@/types/patient";
 
-
 const GenderBadge = ({ gender }: { gender: string }) => {
   const variants = {
     Male: "bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0",
@@ -51,7 +50,7 @@ const PatientDetails = ({ id }: { id: string }) => {
         Number.parseInt(id)
       );
       setPatient(patientData);
-      setMedicalRecords(medicalRecords)
+      setMedicalRecords(medicalRecords);
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch patient");
@@ -83,25 +82,32 @@ const PatientDetails = ({ id }: { id: string }) => {
     );
   }
 
-  const handleSavePatient = (data: Patient) => {
-    setPatient(data);
-    console.log("Patient updated:", data);
+  const handleSavePatient = async (data: Patient) => {
+    console.log(data);
+    try {
+      await patientAPI.update(Number.parseInt(id), data);
+      setPatient(data);
+      toast.success("Successfully updated patient");
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to update");
+    }
   };
 
-  const handleAddRecord = async(record: CreateMedicalRecord) => {
-      try {
-        console.log(record)
-        record.patientId = Number.parseInt(id);
-        const newRecord = await medicalRecordAPI.create(record)
-        
-        // Add the new record to the state
-        setMedicalRecords(prev => [newRecord, ...prev]);
-        
-        toast.success("Record Added")
-      } catch (error) {
-        console.log(error)
-        toast.error("Failed to add record")
-      }
+  const handleAddRecord = async (record: CreateMedicalRecord) => {
+    try {
+      console.log(record);
+      record.patientId = Number.parseInt(id);
+      const newRecord = await medicalRecordAPI.create(record);
+
+      // Add the new record to the state
+      setMedicalRecords((prev) => [newRecord, ...prev]);
+
+      toast.success("Record Added");
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to add record");
+    }
   };
 
   return (
@@ -181,12 +187,9 @@ const PatientDetails = ({ id }: { id: string }) => {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-               {medicalRecords.map((record) => (
-                <PatientMedicalRecordCard
-                 record={record}
-                  key={record.m_id}
-                />
-              ))} 
+              {medicalRecords.map((record) => (
+                <PatientMedicalRecordCard record={record} key={record.m_id} />
+              ))}
             </div>
           </CardContent>
         </Card>

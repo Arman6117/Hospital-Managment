@@ -26,12 +26,13 @@ import {
 } from '@/components/ui/pagination';
 import Link from 'next/link';
 import { patientAPI } from '@/lib/apis/patients/api';
-import { Patient } from '@/types/patient';
+import { PatientTable as PatientTableType } from '@/types/patient';
+import { toast } from 'sonner';
 
 
 
 
-const GenderBadge = ({ gender }: { gender: Patient['gender'] }) => {
+const GenderBadge = ({ gender }: { gender: PatientTableType['gender'] }) => {
   const variants = {
     Male: 'bg-blue-100 text-blue-700 border-blue-200',
     Female: 'bg-pink-100 text-pink-700 border-pink-200',
@@ -47,7 +48,7 @@ const GenderBadge = ({ gender }: { gender: Patient['gender'] }) => {
 
 const PatientTable = () => {
 
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patients, setPatients] = useState<PatientTableType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -69,6 +70,7 @@ const PatientTable = () => {
       setLoading(true);
       setError('');
       const data = await patientAPI.getAll();
+      console.log(data)
       setPatients(data);
     } catch (err) {
       console.error('Error fetching patients:', err);
@@ -78,7 +80,7 @@ const PatientTable = () => {
     }
   };
 
-  
+  console.log(patients)
   const handleDelete = async (id: number, name: string) => {
     if (!confirm(`Are you sure you want to delete ${name}?`)) {
       return;
@@ -88,10 +90,10 @@ const PatientTable = () => {
       await patientAPI.delete(id);
       
       await fetchPatients();
-      alert('Patient deleted successfully!');
+      toast.success('Patient deleted successfully!');
     } catch (err) {
       console.error('Error deleting patient:', err);
-      alert('Failed to delete patient. Please try again.');
+      toast.error('Failed to delete patient. Please try again.');
     }
   };
 
@@ -286,6 +288,7 @@ const PatientTable = () => {
               <TableHead className="font-semibold text-gray-700">Patient Name</TableHead>
               <TableHead className="font-semibold text-gray-700">Age</TableHead>
               <TableHead className="font-semibold text-gray-700">Gender</TableHead>
+              <TableHead className="font-semibold text-gray-700">Mobile</TableHead>
               <TableHead className="font-semibold text-gray-700">Last Visited</TableHead>
               <TableHead className="font-semibold text-gray-700 text-right">Actions</TableHead>
             </TableRow>
@@ -311,6 +314,9 @@ const PatientTable = () => {
                   <TableCell className="text-gray-700">{patient.age}</TableCell>
                   <TableCell>
                     <GenderBadge gender={patient.gender} />
+                  </TableCell>
+                  <TableCell>
+                  <span className="font-medium text-gray-800">{patient.mob}</span>
                   </TableCell>
                   <TableCell className="text-gray-700">
                     {patient.lastVisited 

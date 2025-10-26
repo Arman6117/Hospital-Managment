@@ -55,6 +55,7 @@ export const patientAPI = {
     return response.json();
   },
   update: async (id: number, data: Partial<Patient>) => {
+    console.log(data)
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/patients/${id}`,
       {
