@@ -33,13 +33,13 @@ public class PatientController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Patient> updatePatient(@PathVariable Long id, @RequestBody PatientRequest request) {
+    public ResponseEntity<Patient> updatePatient(@PathVariable("id") Long id, @RequestBody PatientRequest request) {
         return ResponseEntity.ok(patientService.updatePatient(id, request));
 
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePatient(@PathVariable("id") Long id) {
        patientService.deletePatient(id);
        return ResponseEntity.ok().build();
     }
