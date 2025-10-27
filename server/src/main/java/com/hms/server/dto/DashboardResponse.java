@@ -1,32 +1,81 @@
-package com.hms.server.dto;
+package com.hospital.dto;
 
-import com.hms.server.entity.Appointment;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
+import lombok.NoArgsConstructor;
 import java.util.List;
+import java.util.Map;
 
 @Data
-@Builder
-public class DashboardSummaryResponse {
+@NoArgsConstructor
+@AllArgsConstructor
+public class DashboardResponse {
+    // Stats Cards
+    private StatsData stats;
 
-    // KPIs
-    private long totalPatients;
-    private long patientsVisitedThisWeek; // <-- RENAMED (was newPatientsThisWeek)
-    private long totalAppointments;
-    private long completedAppointments;
-    private long pendingAppointments;
+    // Graph Data
+    private GraphData graphs;
 
-    // Graph 1: Weekly Visits
-    private List<DailyAppointmentsSummary> weeklyAppointments;
+    // Today's Appointments
+    private List<TodayAppointmentData> todayAppointments;
 
-    // Graph 2: Gender Distribution
-    private List<GenderDistribution> genderDistribution;
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class StatsData {
+        private Long totalPatients;
+        private Long totalAppointments;
+        private Long completedAppointments;
+        private Long missedAppointments;
+        private Long pendingAppointments;
+    }
 
-    // Graph 3: Age Group Distribution
-    private List<AgeGroupDistribution> ageGroupDistribution;
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class GraphData {
+        private List<VisitByDayData> visitsByDay;
+        private List<GenderDistributionData> genderDistribution;
 
-    // Table: Today's Appointments
-    private List<Appointment> todaysAppointments;
+        // --- ADDED ---
+        private List<AgeDistributionData> ageDistribution;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class VisitByDayData {
+        private String day;  // Monday, Tuesday, etc.
+        private Long visits;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class GenderDistributionData {
+        private String gender;  // Male, Female, Other
+        private Long count;
+        private Double percentage;
+    }
+
+    // --- NEW DTO CLASS ADDED ---
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AgeDistributionData {
+        private String ageGroup; // e.g., "0-19", "20-39"
+        private Long count;
+    }
+    // --- END OF NEW DTO CLASS ---
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TodayAppointmentData {
+        private Long id;
+        private String patientName;
+        private String time;
+        private String status;
+        private String mobile;
+    }
 }
-
