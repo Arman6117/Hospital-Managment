@@ -67,7 +67,7 @@ public class DashboardService {
 
     private List<DashboardResponse.VisitByDayData> getVisitsByDay() {
         LocalDate startDate = LocalDate.now().minusDays(6); // Last 7 days
-        List<Object[]> results = dashboardRepository.countAppointmentsByDayOfWeek(startDate);
+        List<Object[]> results = dashboardRepository.countPatientVisitsByDayOfWeek(startDate);
 
         List<String> daysOfWeek = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
         List<DashboardResponse.VisitByDayData> visitsByDay = new ArrayList<>();

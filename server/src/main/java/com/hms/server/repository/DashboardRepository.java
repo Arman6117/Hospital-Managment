@@ -18,12 +18,20 @@ public interface DashboardRepository extends JpaRepository<Appointment, Long> {
     List<Appointment> findByDateOrderByTimeAsc(LocalDate date);
 
     // Count appointments by day of week (last 7 days)
-    @Query("""
-            SELECT FUNCTION('DAYNAME', a.date) as day, COUNT(a) as count
-            FROM Appointment a
-            WHERE a.date >= :startDate
-            GROUP BY FUNCTION('DAYOFWEEK', a.date), FUNCTION('DAYNAME', a.date)
-            ORDER BY FUNCTION('DAYOFWEEK', a.date)
-            """)
-    List<Object[]> countAppointmentsByDayOfWeek(LocalDate startDate);
+// In your DashboardRepository
+    @Query("SELECT " +
+            "CASE " +
+            "WHEN FUNCTION('DAYOFWEEK', p.lastVisited) = 1 THEN 'Sunday' " +
+            "WHEN FUNCTION('DAYOFWEEK', p.lastVisited) = 2 THEN 'Monday' " +
+            "WHEN FUNCTION('DAYOFWEEK', p.lastVisited) = 3 THEN 'Tuesday' " +
+            "WHEN FUNCTION('DAYOFWEEK', p.lastVisited) = 4 THEN 'Wednesday' " +
+            "WHEN FUNCTION('DAYOFWEEK', p.lastVisited) = 5 THEN 'Thursday' " +
+            "WHEN FUNCTION('DAYOFWEEK', p.lastVisited) = 6 THEN 'Friday' " +
+            "WHEN FUNCTION('DAYOFWEEK', p.lastVisited) = 7 THEN 'Saturday' " +
+            "END as day, " +
+            "COUNT(p) as count " +
+            "FROM Patient p " +
+            "WHERE p.lastVisited >= :startDate " +
+            "GROUP BY FUNCTION('DAYOFWEEK', p.lastVisited)")
+    List<Object[]> countPatientVisitsByDayOfWeek(LocalDate startDate);
 }
